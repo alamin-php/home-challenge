@@ -13,7 +13,8 @@ const NewsAggregator: React.FC = () => {
   const [category, setCategory] = useState("");
   const [source, setSource] = useState("");
   const [date, setDate] = useState("");
-  
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetchNews();
   }, []);
@@ -23,23 +24,29 @@ const NewsAggregator: React.FC = () => {
       const newsapiRes = await axios.get(
         // `https://newsapi.org/v2/everything?q=${search || "latest"}&from=${date}&category=${category}&apiKey=${API_KEYS.newsapi}`
 
-        `https://newsapi.org/v2/everything?q=${search || "latest"}&from=${date}&category=${category}&sources=${source}&apiKey=${API_KEYS.newsapi}`
+        `https://newsapi.org/v2/everything?q=${
+          search || "latest"
+        }&from=${date}&category=${category}&sources=${source}&apiKey=${
+          API_KEYS.newsapi
+        }`
       );
-      console.log('NewsAPI Response:', newsapiRes.data);
-  
-    //   const guardianRes = await axios.get(
-    //     `https://content.guardianapis.com/search?q=${search || "latest"}&section=${category}&from-date=${date}&api-key=${API_KEYS.guardian}`
-    //   );
-    //   console.log('Guardian Response:', guardianRes.data);
-  
+      console.log("NewsAPI Response:", newsapiRes.data);
+
+      //   const guardianRes = await axios.get(
+      //     `https://content.guardianapis.com/search?q=${search || "latest"}&section=${category}&from-date=${date}&api-key=${API_KEYS.guardian}`
+      //   );
+      //   console.log('Guardian Response:', guardianRes.data);
+
       const nytimesRes = await axios.get(
-        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${search || "latest"}&api-key=${API_KEYS.nytimes}`
+        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${
+          search || "latest"
+        }&api-key=${API_KEYS.nytimes}`
       );
 
-    //   https://api.nytimes.com/svc/search/v2/articlesearch.json?q=election&api-key=yourkey
+      //   https://api.nytimes.com/svc/search/v2/articlesearch.json?q=election&api-key=yourkey
 
-      console.log('NYTimes Response:', nytimesRes.data.response.docs);
-  
+      console.log("NYTimes Response:", nytimesRes.data.response.docs);
+
       setArticles([
         ...newsapiRes.data.articles,
         // ...guardianRes.data.response.results,
@@ -47,9 +54,10 @@ const NewsAggregator: React.FC = () => {
       ]);
     } catch (error) {
       console.error("Error fetching news", error);
+    }finally{
+      setLoading(false);
     }
   };
-  
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -88,15 +96,24 @@ const NewsAggregator: React.FC = () => {
       >
         Search
       </button>
-      <ul className="mt-4">
-        {articles.map((article, index) => (
-          <li key={index} className="mb-2 border-b pb-2">
-            <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-              {article.title || article.headline?.main}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <p className="text-gray-600">Loading articles...</p>
+      ) : (
+        <ul className="mt-4">
+          {articles.map((article, index) => (
+            <li key={index} className="mb-2 border-b pb-2">
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600"
+              >
+                {article.title || article.headline?.main}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
